@@ -1,7 +1,13 @@
 import sys
 import pandas as pd
+import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from preprocess import split
+
+
+def Score(y_pred, y_true, weight):
+    return np.sum(-weight * (y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))) / np.sum(weight)
+
 
 if __name__ == '__main__':
     val = True
@@ -20,11 +26,13 @@ if __name__ == '__main__':
     clf = RandomForestClassifier(n_estimators=100, max_depth=10, n_jobs=2)
     clf.fit(x_train, y_train)
 
+    prob = clf.predict_proba(x_valid)[:, 1]
     if val:
-        score = clf.score(x_valid, y_valid)
+        accuracy = clf.score(x_valid, y_valid)
+        score = Score(prob, y_valid, weight)
+        print(accuracy)
         print(score)
     else:
-        y_test = clf.predict_proba(x_valid)[:, 1]
-        result = {'id': id_test, 'proba': y_test}
+        result = {'id': id_test, 'proba': prob}
         result = pd.DataFrame(result)
         result.to_csv(sys.argv[3], index=False)
