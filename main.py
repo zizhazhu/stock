@@ -9,7 +9,7 @@ if __name__ == '__main__':
     train_data = pd.read_csv(sys.argv[1])
     result = split.data_split(train_data, val=val, part=2)
     if val:
-        x_train, x_valid, y_train, y_valid = result
+        x_train, x_valid, y_train, y_valid, weight = result
     else:
         x_train, y_train = result
         test_data = pd.read_csv(sys.argv[2])
