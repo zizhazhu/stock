@@ -20,10 +20,11 @@ if __name__ == '__main__':
         x_train, y_train = result
         test_data = pd.read_csv(sys.argv[2])
         id_test = test_data['id']
-        test_data.drop(['id', 'group', 'feature77'], axis=1, inplace=True)
+        test_data = split.one_hot_extend(test_data, 'group', remove=True)
+        test_data = test_data.drop(['id', 'feature77'], axis=1)
         x_valid = test_data
 
-    clf = RandomForestClassifier(n_estimators=100, max_depth=10, n_jobs=2)
+    clf = RandomForestClassifier(n_estimators=100, max_depth=10, oob_score=True, n_jobs=-3)
     clf.fit(x_train, y_train)
 
     prob = clf.predict_proba(x_valid)[:, 1]
