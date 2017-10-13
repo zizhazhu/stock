@@ -2,6 +2,7 @@ import sys
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
 from preprocess import split
 
 
@@ -10,7 +11,7 @@ def Score(y_pred, y_true, weight):
 
 
 if __name__ == '__main__':
-    val = True
+    val = False
 
     train_data = pd.read_csv(sys.argv[1])
     result = split.data_split(train_data, val=val, part=None)
@@ -24,7 +25,7 @@ if __name__ == '__main__':
         test_data = test_data.drop(['id', 'feature77'], axis=1)
         x_valid = test_data
 
-    clf = RandomForestClassifier(n_estimators=100, max_depth=10, oob_score=True, n_jobs=-3)
+    clf = RandomForestClassifier(n_estimators=200, max_depth=6, oob_score=True, n_jobs=-3)
     clf.fit(x_train, y_train)
 
     prob = clf.predict_proba(x_valid)[:, 1]
