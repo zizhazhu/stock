@@ -1,10 +1,16 @@
 import pandas as pd
+from sklearn.preprocessing import LabelBinarizer
 
 
 def data_split(dataset, val=True, part=None):
     # weight determine score
     if part is not None:
         dataset = dataset[dataset['group'] == part]
+    else:
+        group = dataset['group'].values
+        group = LabelBinarizer().fit_transform(group)
+        group = pd.DataFrame(group)
+        dataset = pd.concat([dataset, group], axis=1)
     weight =dataset['weight']
     dataset = dataset.drop(['feature77', 'id', 'weight', 'group'], axis=1)
     y = dataset['label'].astype('int')
