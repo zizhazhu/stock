@@ -19,7 +19,7 @@ def data_split(dataset, val=True, part=None):
     else:
         dataset = one_hot_extend(dataset, 'group', remove=True)
     weight = dataset['weight']
-    dataset = dataset.drop(['feature77', 'id', 'weight'], axis=1)
+    dataset = dataset.drop(['feature43', 'id', 'weight'], axis=1)
     y = dataset['label'].astype('int')
     dataset = dataset.drop('label', axis=1)
     x = dataset

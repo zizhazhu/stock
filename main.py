@@ -23,6 +23,7 @@ if __name__ == '__main__':
         id_test = test_data['id']
         test_data = split.one_hot_extend(test_data, 'group', remove=True)
         test_data = test_data.drop(['id', 'feature77'], axis=1)
+        test_data = test_data.drop(['id', 'feature43'], axis=1)
         x_valid = test_data
 
     clf = RandomForestClassifier(n_estimators=200, max_depth=6, oob_score=True, n_jobs=-3)
