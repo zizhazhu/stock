@@ -3,9 +3,9 @@ import pandas as pd
 
 
 if __name__ == '__main__':
-    val = True
-
     dataset = pd.read_csv(sys.argv[1])
+    print(dataset.info())
+    print(dataset.describe())
     for i in range(1, 29):
         group_dataset = dataset[dataset['group'] == i]
         print("Group {} has {} entries".format(i, group_dataset.shape[0]))
