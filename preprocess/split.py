@@ -12,20 +12,24 @@ def one_hot_extend(dataset, label, remove=False):
     return dataset
 
 
-def data_split(dataset, val=True, part=None):
+def data_split(dataset, val=True, part=None, drop=None, era=20):
     # weight determine score
-    if part is not None:
+    if part:
         dataset = dataset[dataset['group'] == part]
     else:
         dataset = one_hot_extend(dataset, 'group', remove=True)
     weight = dataset['weight']
     dataset = dataset.drop(['feature43', 'id', 'weight'], axis=1)
+    if drop:
+        dataset = dataset.drop([drop], axis=1)
     y = dataset['label'].astype('int')
     dataset = dataset.drop('label', axis=1)
     x = dataset
+
+    # split train valid by era
     if val:
-        train_idx = dataset['era'] != 20
-        valid_idx = dataset['era'] == 20
+        train_idx = dataset['era'] != era
+        valid_idx = dataset['era'] == era
         x = x.drop('era', axis=1)
         x_train, x_valid = x[train_idx], x[valid_idx]
         y_train, y_valid = y[train_idx], y[valid_idx]

@@ -14,7 +14,7 @@ if __name__ == '__main__':
     val = True
 
     train_data = pd.read_csv(sys.argv[1])
-    result = split.data_split(train_data, val=val, part=None)
+    result = split.data_split(train_data, val=val, part=None, drop='feature14')
     if val:
         x_train, x_valid, y_train, y_valid, weight = result
     else:
