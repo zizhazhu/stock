@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 
 def batch_generator(features, labels, batch_size=64):
@@ -11,13 +12,12 @@ def batch_generator(features, labels, batch_size=64):
 
 class NeuralNetwork:
 
-    def __init__(self, dimensions, epochs, dtype=tf.float32):
+    def __init__(self, dimensions, epochs, learning_rate=1e-4, keep_prob=0.5, dtype=tf.float32):
         self.dtype = dtype
         self.epochs = epochs
-        self.cost_tracer = []
 
-        self.X = tf.placeholder(self.dtype, shape=(None, dimensions[0]))
-        self.y = tf.placeholder(self.dtype, shape=(None, ))
+        self.X = tf.placeholder(self.dtype, shape=(None, dimensions[0]), name='X')
+        self.y = tf.placeholder(self.dtype, shape=(None, ), name='y')
         self.y_reshaped = tf.reshape(self.y, [-1, 1], name='label')
 
         layer1 = tf.layers.dense(self.X, dimensions[1], activation=tf.nn.relu)
@@ -25,11 +25,12 @@ class NeuralNetwork:
         layer3 = tf.layers.dense(layer2, dimensions[3], activation=tf.nn.relu)
 
         self.logits = tf.layers.dense(layer3, 1, activation=None)
-        self.y_pred = tf.nn.sigmoid(self.logits)
-        self.cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.y_reshaped, logits=self.logits))
+        self.y_prob = tf.nn.sigmoid(self.logits)
+        self.cross_entropy = tf.reduce_mean(
+            tf.nn.sigmoid_cross_entropy_with_logits(labels=self.y_reshaped, logits=self.logits))
 
-        self.data = tf.train.AdamOptimizer(1e-4).minimize(self.cross_entropy)
-        self.output = tf.cast(self.y_pred > 0.5, tf.int32)
+        self.data = tf.train.AdamOptimizer(learning_rate).minimize(self.cross_entropy)
+        self.output = tf.cast(self.y_prob > 0.5, tf.int32)
         correct_prediction = tf.equal(self.y, tf.cast(self.output, tf.float32))
         self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         self.sess = tf.Session()
@@ -38,17 +39,20 @@ class NeuralNetwork:
         self.sess.run(tf.global_variables_initializer())
 
         for i in range(self.epochs):
+            cost = 0
             accuracy = None
             for batch_X, batch_y in batch_generator(X, y):
-                accuracy = self.sess.run([self.accuracy], feed_dict={self.X: batch_X, self.y: batch_y})
-            print(accuracy)
+                cost, accuracy = self.sess.run([self.cross_entropy, self.accuracy], feed_dict={self.X: batch_X, self.y: batch_y})
+            print("epoch:{} cost:{} train_accuracy:{}".format(i+1, cost, accuracy))
 
     def predict(self, X):
         output = self.sess.run(self.output, feed_dict={self.X: X})
         return output
 
     def predict_proba(self, X):
-        output = self.sess.run(self.y_pred, feed_dict={self.X: X})
+        output = np.zeros([X.shape[0], 2])
+        output[:, 1] = self.sess.run(self.y_prob, feed_dict={self.X: X})
+        output[:, 0] = 1 - output[:, 1]
         return output
 
     def score(self, X, y):
