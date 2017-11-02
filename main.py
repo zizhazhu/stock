@@ -33,8 +33,7 @@ if __name__ == '__main__':
     Scaler = MinMaxScaler()
     Scaler.fit_transform(x_train)
     Scaler.transform(x_valid)
-    #clf = RandomForestClassifier(n_estimators=200, max_depth=2, oob_score=True, n_jobs=-2)
-    clf = NeuralNetwork([x_train.shape[1], 128, 64, 32], 100)
+    clf = NeuralNetwork([x_train.shape[1], 128, 64, 32], 10)
     clf.fit(x_train, y_train)
 
     prob = clf.predict_proba(x_valid)[:, 1]
