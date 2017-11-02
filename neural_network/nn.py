@@ -18,16 +18,16 @@ class NeuralNetwork:
 
         self.X = tf.placeholder(self.dtype, shape=(None, dimensions[0]), name='X')
         self.y = tf.placeholder(self.dtype, shape=(None, ), name='y')
-        self.y_reshaped = tf.reshape(self.y, [-1, 1], name='label')
 
         layer1 = tf.layers.dense(self.X, dimensions[1], activation=tf.nn.relu)
         layer2 = tf.layers.dense(layer1, dimensions[2], activation=tf.nn.relu)
         layer3 = tf.layers.dense(layer2, dimensions[3], activation=tf.nn.relu)
 
         self.logits = tf.layers.dense(layer3, 1, activation=None)
+        self.logits = tf.reshape(self.logits, [-1], name='logits')
         self.y_prob = tf.nn.sigmoid(self.logits)
         self.cross_entropy = tf.reduce_mean(
-            tf.nn.sigmoid_cross_entropy_with_logits(labels=self.y_reshaped, logits=self.logits))
+            tf.nn.sigmoid_cross_entropy_with_logits(labels=self.y, logits=self.logits))
 
         self.data = tf.train.AdamOptimizer(learning_rate).minimize(self.cross_entropy)
         self.output = tf.cast(self.y_prob > 0.5, tf.int32)
