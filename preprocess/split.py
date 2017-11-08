@@ -15,11 +15,10 @@ def one_hot_extend(dataset, label, remove=False):
 def data_split(dataset, val=True, part=None, drop=None, era=20):
     # weight determine score
     if part:
-        dataset = dataset[dataset['group'] == part]
-    else:
-        dataset = one_hot_extend(dataset, 'group', remove=True)
+        dataset = dataset[dataset['group1'] == part]
     weight = dataset['weight']
-    dataset = dataset.drop(['id', 'weight'], axis=1)
+    dataset = dataset.drop('group1', axis=1)
+    dataset = dataset.drop(['id', 'weight', 'code_id'], axis=1)
     if drop:
         dataset = dataset.drop([drop], axis=1)
     y = dataset['label'].astype('int')
