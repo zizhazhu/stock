@@ -12,16 +12,21 @@ def batch_generator(features, labels, batch_size=64):
 
 class NeuralNetwork:
 
-    def __init__(self, dimensions, epochs, learning_rate=1e-4, keep_prob=0.5, dtype=tf.float32):
+    def __init__(self, dimensions, epochs, learning_rate=1e-4, drop_rate=0.5, dtype=tf.float32):
         self.dtype = dtype
         self.epochs = epochs
+        self.drop_rate = drop_rate
 
         self.X = tf.placeholder(self.dtype, shape=(None, dimensions[0]), name='X')
         self.y = tf.placeholder(self.dtype, shape=(None, ), name='y')
+        self.drop_rate_ph = tf.placeholder(tf.float32, name='drop_rate')
 
         layer1 = tf.layers.dense(self.X, dimensions[1], activation=tf.nn.relu)
+        layer1 = tf.layers.dropout(layer1, rate=self.drop_rate_ph)
         layer2 = tf.layers.dense(layer1, dimensions[2], activation=tf.nn.relu)
+        layer2 = tf.layers.dropout(layer2, rate=self.drop_rate_ph)
         layer3 = tf.layers.dense(layer2, dimensions[3], activation=tf.nn.relu)
+        layer3 = tf.layers.dropout(layer3, rate=self.drop_rate_ph)
 
         self.logits = tf.layers.dense(layer3, 1, activation=None)
         self.logits = tf.reshape(self.logits, [-1], name='logits')
@@ -42,16 +47,18 @@ class NeuralNetwork:
             cost = 0
             accuracy = None
             for batch_X, batch_y in batch_generator(X, y):
-                cost, accuracy = self.sess.run([self.cross_entropy, self.accuracy], feed_dict={self.X: batch_X, self.y: batch_y})
+                cost, accuracy = self.sess.run(
+                    [self.cross_entropy, self.accuracy],
+                    feed_dict={self.X: batch_X, self.y: batch_y, self.drop_rate_ph: self.drop_rate})
             print("epoch:{} cost:{} train_accuracy:{}".format(i+1, cost, accuracy))
 
     def predict(self, X):
-        output = self.sess.run(self.output, feed_dict={self.X: X})
+        output = self.sess.run(self.output, feed_dict={self.X: X, self.drop_rate_ph: 0})
         return output
 
     def predict_proba(self, X):
         output = np.zeros([X.shape[0], 2])
-        output[:, 1] = self.sess.run(self.y_prob, feed_dict={self.X: X})
+        output[:, 1] = self.sess.run(self.y_prob, feed_dict={self.X: X, self.drop_rate_ph: 0})
         output[:, 0] = 1 - output[:, 1]
         return output
 
