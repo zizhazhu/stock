@@ -6,11 +6,15 @@ if __name__ == '__main__':
     dataset = pd.read_csv(sys.argv[1])
     print(dataset.info())
     print(dataset.describe())
-    for i in range(1, 29):
-        group_dataset = dataset[dataset['group'] == i]
-        print("Group {} has {} entries".format(i, group_dataset.shape[0]))
-        for j in range(1, 21):
-            tmp_dataset = group_dataset[group_dataset['era'] == j]
-            one = tmp_dataset[tmp_dataset['label'] == 1]
-            zero = tmp_dataset[tmp_dataset['label'] == 0]
-            print("Group:{} Era:{} 1:{} 0:{}".format(i, j, one.shape[0], zero.shape[0]))
+    data_group = {}
+    for data_index, data_line in dataset.iterrows():
+        code_id = int(data_line['code_id'])
+        group2 = int(data_line['group2'])
+        if code_id in data_group:
+            if data_group[code_id] != group2:
+                print("not")
+                break
+        else:
+            data_group[code_id] = group2
+    else:
+        print("yes")
